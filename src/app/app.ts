@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -22,7 +22,10 @@ export class AppComponent implements OnInit {
     body: ''
   };
 
-  constructor(private postService: PostService) {}
+  constructor(
+    private postService: PostService,
+    private cdr: ChangeDetectorRef   // TO update UI immediately 
+  ) {}
 
   ngOnInit(): void {
     this.fetchPosts();
@@ -30,25 +33,34 @@ export class AppComponent implements OnInit {
 
   fetchPosts() {
     this.postService.getPosts().subscribe({
-      next: (data) => this.posts = data,
-      error: () => this.errorMessage = 'Failed to load posts'
+      next: (data) => {
+        this.posts = data;           // assign data
+        this.cdr.detectChanges();    // FORCE UI UPDATE
+      },
+      error: () => {
+        this.errorMessage = 'Failed to load posts';
+        this.cdr.detectChanges();    // ensure error shows
+      }
     });
   }
 
   toggleForm() {
     this.showForm = !this.showForm;
     this.errorMessage = '';
+    this.cdr.detectChanges();        // needed for zoneless
   }
 
   submitPost() {
     this.postService.addPost(this.newPost).subscribe({
       next: (response) => {
-        this.posts.unshift(response);
+        this.posts = [response, ...this.posts]; // immutable update
         this.newPost = { title: '', body: '' };
         this.showForm = false;
+        this.cdr.detectChanges();    //  update UI
       },
       error: () => {
         this.errorMessage = 'Adding post failed';
+        this.cdr.detectChanges();    //  update UI
       }
     });
   }
