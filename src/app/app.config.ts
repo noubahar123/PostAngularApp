@@ -9,7 +9,7 @@ import { routes } from './app.routes';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(),              // ✅ API calls
-    importProvidersFrom(FormsModule)  // ✅ ngModel
+    provideHttpClient(),              
+    importProvidersFrom(FormsModule)  
   ]
 };
